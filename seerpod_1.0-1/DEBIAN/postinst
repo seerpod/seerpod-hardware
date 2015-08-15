@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sudo ln -s /opt/seerpod/logs /var/log/seerpod
+sudo ln -s /opt/seerpod/init.d/seerpod /etc/init.d/seerpod
+sudo ln -s /opt/seerpod/init.d/counter /etc/init.d/counter
+sudo ln -s /opt/seerpod/init.d/health /etc/init.d/health

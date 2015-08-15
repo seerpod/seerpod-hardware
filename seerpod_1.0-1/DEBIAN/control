@@ -1,0 +1,7 @@
+Package: seerpod
+Version: 1.0-1
+Section: base
+Priority: optional
+Architecture: i386
+Maintainer: Utkarsh Bhatnagar <utkarsh.cmu@gmail.com>
+Description: This package installs seerpod on rasp pi and manages the software on rasp pi.

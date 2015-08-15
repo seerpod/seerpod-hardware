@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# sudo service seerpod stop
+sudo rm -rf /etc/init.d/seerpod
+sudo rm -rf /etc/init.d/health
+sudo rm -rf /etc/init.d/counter
+sudo rm -rf /var/log/seerpod

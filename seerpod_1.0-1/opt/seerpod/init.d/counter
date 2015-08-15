@@ -1,0 +1,63 @@
+#!/bin/sh
+
+PIDFILE='/opt/seerpod/run/counter.pid'
+
+start() {
+	echo "Starting Counter service...."
+	PID=`nohup python /opt/seerpod/scripts/services/counter.py > /opt/seerpod/logs/counter.log 2>&1 & echo $!`
+	if [ -z $PID ]; then
+		printf "%s\n" "Counter service failed to start."
+	else
+		echo $PID > $PIDFILE
+	        printf "%s\n" "Counter service started with PROCESS ID - $PID"
+	fi
+}
+
+status() {
+	if [ -f $PIDFILE ]; then
+		PID=`cat $PIDFILE`
+	        if [ -z "`ps axf | grep ${PID} | grep -v grep`" ]; then
+	        	printf "%s\n" "Counter service dead but pidfile exists"
+	        else
+	        	echo "Counter service started with PROCESS ID - $PID"
+	        fi
+	else
+	        printf "%s\n" "Counter service not running"
+	fi
+}
+
+stop() {
+        echo "Stopping Counter service..."
+	PID=`cat $PIDFILE`
+	if [ -f $PIDFILE ]; then
+	        kill -HUP $PID
+	        printf "%s\n" "Counter service stopped."
+	        rm -f $PIDFILE
+	else
+		printf "%s\n" "Counter service pidfile not found"
+	fi
+}
+
+case "$1" in
+    start)
+        start
+        exit 0
+    ;;
+    stop)
+        stop
+        exit 0
+    ;;
+    status)
+	status
+	exit 0
+    ;;
+    reload|restart|force-reload)
+        stop
+        start
+        exit 0
+    ;;
+    **)
+        echo "Usage: $0 {start|stop|status|reload|restart|force-reload}" 1>&2
+        exit 1
+    ;;
+esac

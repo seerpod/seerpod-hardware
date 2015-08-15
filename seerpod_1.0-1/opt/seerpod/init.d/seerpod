@@ -1,0 +1,46 @@
+#!/bin/bash
+
+start() {
+	echo "Starting Seerpod..."
+	sudo service health start
+	sudo service counter start
+	echo "Seerpod started."
+}
+
+stop() {
+	echo "Stopping Seerpod..."
+        sudo service health stop  
+        sudo service counter stop
+        echo "Seerpod stopped."
+}
+
+status() {
+	echo "Fetching Seerpod Status..."
+        sudo service health status
+        sudo service counter status
+        echo "Seerpod status complete."
+}
+
+case "$1" in
+    start)
+        start
+        exit 0
+    ;;
+    stop)
+        stop
+        exit 0
+    ;;
+    status)
+        status
+        exit 0
+    ;;
+    reload|restart|force-reload)
+        stop
+        start
+        exit 0
+    ;;
+    **)
+        echo "Usage: $0 {start|stop|status|reload|restart|force-reload}" 1>&2
+        exit 1
+    ;;
+esac
