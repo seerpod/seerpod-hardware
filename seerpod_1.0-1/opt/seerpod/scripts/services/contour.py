@@ -1,18 +1,21 @@
 from SimpleCV import np, cv2
+import logging
 import sys
 import config
 
 # Returns the bounding box of the contour which has area > contourAreaThresh
 def getBigContours(counter, bkgSubtr):
-	print "finding foreground object .",
+	if config.logger.isEnabledFor(logging.DEBUG):
+		config.logger.debug("Finding foreground object..."),
 
 	while(1):
-		print ".",
-		sys.stdout.flush()
+		# print ".",
+		# sys.stdout.flush()
 		frame = counter.getNextFrame()
 
 		if frame is None:
-			print "\nNo more frames to analyze, exiting"
+			if config.logger.isEnabledFor(logging.DEBUG):
+				config.logger.debug("No more frames to analyze, exiting")
 			sys.exit()
 
 		height, width  = frame.shape[:2]
@@ -30,17 +33,21 @@ def getBigContours(counter, bkgSubtr):
 		contourFound = 0
 		boundingBoxes = {}
 		for cnt in contours:
-			if config.contourAreaThresh < cv2.contourArea(cnt) < (0.7 * frameArea):
-				print "\npassing contour area: ", cv2.contourArea(cnt)
+			ctourArea = cv2.contourArea(cnt)
+			if config.contourAreaThresh < ctourArea < (0.7 * frameArea):
+				if config.logger.isEnabledFor(logging.DEBUG):
+					config.logger.debug("Passing contour area: %s", ctourArea)
 				(x,y,w,h) = cv2.boundingRect(cnt)
-				print "bb: ", (x,y,w,h)
+				if config.logger.isEnabledFor(logging.DEBUG):
+					config.logger.debug("bb: %s", (x,y,w,h))
 				newX = x + int(w * config.bbRatio)
 				newY = y + int(h * config.bbRatio)
 				newXmax = newX + int(w * config.bbRatio)
 				newYmax = newY + int(h * config.bbRatio)
 				key = str(newX) + "|" + str(newY) + "|" + str(newXmax - newX) + "|" + str(newYmax - newY)
 				boundingBoxes[key] = (newX, newY, newXmax - newX, newYmax - newY)
-				print "new bb: ", (newX, newY, newXmax - newX, newYmax - newY)
+				if config.logger.isEnabledFor(logging.DEBUG):
+					config.logger.debug("new bb: %s", (newX, newY, newXmax - newX, newYmax - newY))
 				contourFound = 1
 			else: # mask the unwanted contours
 				cv2.drawContours(mask, [cnt], -1, 0, -1)
@@ -61,7 +68,8 @@ def getBigContours(counter, bkgSubtr):
 			return (orig_masked, boundingBoxes)
 
 	# target contour not found in the video
-	print "no contour with area > contourAreaThresh found"
+	if config.logger.isEnabledFor(logging.DEBUG):
+		config.logger.debug("no contour with area > contourAreaThresh found")
 	return (None, None)
 
 def removeSmallContours(orig_image, fgmask, minContourArea):
@@ -91,12 +99,13 @@ def findNewBigContours(contours, fsMapForBBs, frameArea):
 			(x,y,w,h) = cv2.boundingRect(cnt)
 			for key in fsMapForBBs:
 				(fx, fy, fw, fh) = fsMapForBBs[key][-1].getBB()
-				print "x,y,w,h: " + str(x) + "," + str(y) + "," + str(w) + "," + str(h)
-				print "fx,fy,fw,fh: " + str(fx) + "," + str(fy) + "," + str(fw) + "," + str(fh)
+				#print "x,y,w,h: " + str(x) + "," + str(y) + "," + str(w) + "," + str(h)
+				#print "fx,fy,fw,fh: " + str(fx) + "," + str(fy) + "," + str(fw) + "," + str(fh)
 				if (((fx > x) and (fx < (x + w))) or ((x > fx) and (x < (fx + fw)))) \
 				   and (((fy > y) and (fy < (y + h))) or ((y > fy) and (y < (fy + fh)))):
 					# contours intersect
-					print "contours intersect, not adding to new big contours"
+					if config.logger.isEnabledFor(logging.DEBUG):
+						config.logger.debug("contours intersect, not adding to new big contours")
 				else:
 					# add to new big contours
 					newX = x + int(w * config.bbRatio)

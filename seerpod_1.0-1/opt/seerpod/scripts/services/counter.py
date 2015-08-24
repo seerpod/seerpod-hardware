@@ -1,6 +1,7 @@
 from SimpleCV import cv2, Image
 import argparse
 import sys
+import logging
 import config
 from back_subtractor import BackgroundSubtractor
 from tracker import Tracker
@@ -40,15 +41,10 @@ def parseArguments():
 	parser.add_argument("-vt", "--videoType", default="stream", help="video stream or video file [stream/file]")
 	parser.add_argument("-vs", "--videoSource", default="0", help="video file path or integer \
 		(enclosed on quotes) for video stream")
+	parser.add_argument("-out", "--outFile", default="out/counts.out", help="output file path")
 	parser.add_argument("-cat", "--contourAreaThresh", default=40000, help="min area of contours to pass human test")
-
-	args = parser.parse_args()
-	config.videoType = args.videoType
-	if config.videoType == "stream":
-		config.videoSource = int(args.videoSource)
-	else:
-		config.videoSource = args.videoSource
-	config.contourAreaThresh = args.contourAreaThresh
+	parser.add_argument("-ll", "--logLevel", default="debug", help="log level [info/debug/warn/error/critical]")
+	parser.add_argument("-lf", "--logFile", default="logs/seerpod-rotating.log", help="log file path")
 
 	# print "config:"
 	# print config.videoSource
@@ -60,26 +56,50 @@ def parseArguments():
 	# print config.endTrackingLine
 	# print config.bbRatio
 
+	return parser.parse_args()
+
 if __name__ == "__main__":
-	config.init()
-	parseArguments()
+	args = parseArguments()
+	config.init(args)
 	counter = Counter()
 
 	counter.start()
-
-	# initialize a background subtractor (can be one of "absdiff", "simple", or "mog2")
-	backgroundSubtractor = BackgroundSubtractor("mog2", counter)
+	if config.logger.isEnabledFor(logging.INFO):
+		config.logger.info("Counter started")
 	
-	# keep on tracking indefinitely
+	# initialize a background subtractor (can be one of "absdiff", "simple", or "mog2")
+	backSubtrType = "mog2"
+	backgroundSubtractor = BackgroundSubtractor(backSubtrType, counter)
+	if config.logger.isEnabledFor(logging.DEBUG):
+		config.logger.debug("Initialized %s background subtractor", backSubtrType)
+	
+	# keep on tracking until consecutive 1000 exceptions are encountered
+	errorCount = 0
 	while True:
 		#human_ctour_img, humanContours = ctour.getHumanContours(counter, backgroundSubtractor)
-		tracker = Tracker("single", backgroundSubtractor)
+		trackerType = "single"
+		tracker = Tracker(trackerType, backgroundSubtractor)
+		if config.logger.isEnabledFor(logging.DEBUG):
+			config.logger.debug("Initialized %s tracker", trackerType)
+
 		try:
 			return_code = tracker.track(counter)
 
+			if config.logger.isEnabledFor(logging.DEBUG):
+				config.logger.debug("Tracker returned code [%s]", return_code)
+
 			if return_code is config.NO_MORE_FRAMES:
+				if config.logger.isEnabledFor(logging.INFO):
+					config.logger.info("No more frames to analyze. Exiting.")
 				sys.exit()
 
 		except Exception as e:
-			print "Encountered exception in tracking: ", e
+			if config.logger.isEnabledFor(logging.WARN):
+				config.logger.warn("Encountered exception in tracking: %s", e)
+			errorCount += 1
+			if errorCount > 100:
+				if config.logger.isEnabledFor(logging.ERROR):
+					config.logger.exception("Encountered 100 consecutive exceptions. Exiting.")
+				break
 	 		continue
+	 	errorCount = 0

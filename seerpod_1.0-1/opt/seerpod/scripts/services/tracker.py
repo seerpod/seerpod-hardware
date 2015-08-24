@@ -1,4 +1,5 @@
 from SimpleCV import *
+import logging
 import config
 import contour as ctour
 
@@ -41,7 +42,8 @@ class SingleObjectTracker(Tracker):
 												self.backgroundSubtr) # Get Bounding Box
 
 			if human_ctour_img is None:
-				print "\nNo more frames to analyze, exiting"
+				if config.logger.isEnabledFor(logging.DEBUG):
+					config.logger.debug("No more frames to analyze, exiting")
 				return config.NO_MORE_FRAMES
 
 			h, w = human_ctour_img.shape[:2]
@@ -67,19 +69,24 @@ class SingleObjectTracker(Tracker):
 				processed_image,_ = ctour.removeSmallContours(opencv_img, fg_mask, config.contourAreaThresh/2)
 				simplecv_img = counter.convertToSimpleCvImage(processed_image)
 
-				print "fs1 before track: ", fs1
-				print "target_ctour before track: ", target_ctour
+				# if config.logger.isEnabledFor(logging.DEBUG):
+				# 	config.logger.debug("fs1 before track: %s", fs1)
+				if config.logger.isEnabledFor(logging.DEBUG):
+					config.logger.debug("target_ctour before track: %s", target_ctour)
 				if self.isSubjectOutOfFrame(fs1):
-					print "tracked object out of frame, searching new big contour."
+					if config.logger.isEnabledFor(logging.DEBUG):
+						config.logger.debug("tracked object out of frame, searching new big contour.")
 					break
 				try:
-					fs1 = simplecv_img.track("camshift",fs1,img,target_ctour,num_frames=5)
+					fs1 = simplecv_img.track("camshift", fs1,img, target_ctour, num_frames=5)
 				except Exception as e:
-					print "Encountered exception: ", e
+					if config.logger.isEnabledFor(logging.WARN):
+						config.logger.warn("Encountered exception: ", e)
 					break
 
 				if self.isSubjectOutOfFrame(fs1):
-					print "tracked object out of frame, searching new big contour."
+					if config.logger.isEnabledFor(logging.DEBUG):
+						config.logger.debug("tracked object out of frame, searching new big contour.")
 					break
 
 				fs1.drawBB(color=Color.RED)
@@ -95,7 +102,8 @@ class SingleObjectTracker(Tracker):
 				simplecv_img.dl().selectFont('purisa')
 				simplecv_img.drawText("in: " + str(inCount) + "    out: " + str(outCount), x=100, y=30, fontsize=30)
 
-				print "fs1=", fs1[-1].getBB()
+				if config.logger.isEnabledFor(logging.DEBUG):
+					config.logger.debug("fs1=%s", fs1[-1].getBB())
 				y = fs1[-1].getBB()[1] # from top left (it should go down to 0)
 				lengthBB = fs1[-1].getBB()[2]
 
@@ -103,7 +111,6 @@ class SingleObjectTracker(Tracker):
 
 				yCoord.append(y)
 				if trackingStarted == 0:
-					print "in tracking started = 0"
 					if (count < config.minFrameToWait):
 						# if top most point of the subject is before the startTrackingLine (middle one)
 						if (max(yCoord) > (h * config.startTrackingLine)):
@@ -113,36 +120,47 @@ class SingleObjectTracker(Tracker):
 							movingOut = True
 						# the y coordinate of the detected object has been beyond the central line at least once
 						# start tracking and see if it crosses h/6
-						print "started tracking"
+						if config.logger.isEnabledFor(logging.DEBUG):
+							config.logger.debug("started tracking")
 						trackingStarted = 1
 					elif (count > config.minFrameToWait):
 						# tracking hasn't started yet (subject is beyond the startTrack line)
-						print "tracking not started even after " + str(config.minFrameToWait) + " frames, finding next big contour."
+						if config.logger.isEnabledFor(logging.DEBUG):
+							config.logger.debug("tracking not started even after %s frames, finding next big contour.", 
+								str(config.minFrameToWait))
 						break
 				elif (trackingStarted == 1) and (count <= config.maxFramesToAnalyze):
-					print "tracking in progress"
-					print "min yCoord: ", min(yCoord)
-					print "max yCoord: ", max(yCoord)
-					print "y: ", y
+					if config.logger.isEnabledFor(logging.DEBUG):
+							config.logger.debug("tracking in progress")
+					if config.logger.isEnabledFor(logging.DEBUG):
+						config.logger.debug("min yCoord: %s", str(min(yCoord)))
+					if config.logger.isEnabledFor(logging.DEBUG):
+						config.logger.debug("max yCoord: %s", str(max(yCoord)))
+					if config.logger.isEnabledFor(logging.DEBUG):
+						config.logger.debug("y: %s", y)
 					# tracking in progress
 					if (min(yCoord) < (h * config.endTrackingLine)) and movingIn:
-						print "subject crossed endTrackingLine while moving in"
+						if config.logger.isEnabledFor(logging.DEBUG):
+							config.logger.debug("subject crossed endTrackingLine while moving in")
 						inCount += 1
 						movingIn = False
 						break
 					# check if the lower most point in the bounding box has crossed the lower endTrackingLine
 					elif ((max(yCoord) + fs1[-1].getBB()[3]) > (h * (1 - config.endTrackingLine))) and movingOut:
-						print "subject crossed endTrackingLine while moving out"
+						if config.logger.isEnabledFor(logging.DEBUG):
+							config.logger.debug("subject crossed endTrackingLine while moving out")
 						outCount += 1
 						movingOut = False
 						break
 				elif count > config.maxFramesToAnalyze:
-					print "count exceeded maxFramesToAnalyze"
+					if config.logger.isEnabledFor(logging.DEBUG):
+						config.logger.debug("count exceeded maxFramesToAnalyze")
 					# subject hasn't crossed h/6 in maxFramesToAnalyze frames; exit loop
 					break
 				count += 1
-			print "inCount: ", inCount
-			print "outCount: ", outCount
+			config.out.info("%s|%s", inCount, outCount)
+			if config.logger.isEnabledFor(logging.INFO):
+				config.logger.info("inCount=%s|outCount=%s", inCount, outCount)
 			globalCount += 1
 
 class MultipleObjectTracker(Tracker):
