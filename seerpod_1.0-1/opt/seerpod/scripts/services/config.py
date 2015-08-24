@@ -1,7 +1,6 @@
 import logging
 import logging.handlers
 import os
-from rotatingfile import RotatingFile
 
 # config.py
 ## Defines global variables that are used throughout

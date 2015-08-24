@@ -23,4 +23,15 @@ Services
 1. HealthCheck service
 	sudo service health (start|stop|status|restart)
 2. Counter service
-	sudo service health (start|stop|status|restart)
+	sudo service counter (start|stop|status|restart)
+
+Command to run counter.py standalone
+------------------------------------
+1. To run on a sample video:
+	python counter.py -vt "file" -vs "images/Video2-short.mp4"
+2. To run on live camera feed:
+	python counter.py
+	(uses -vt=stream and -vt=0)
+3. To adjust log levels:
+	python counter.py -vt "file" -vs "images/Video2-short.mp4" -ll "warn"
+	(log levels can be info/debug/warn/error/critical)
