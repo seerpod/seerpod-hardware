@@ -46,16 +46,6 @@ def parseArguments():
 	parser.add_argument("-ll", "--logLevel", default="debug", help="log level [info/debug/warn/error/critical]")
 	parser.add_argument("-lf", "--logFile", default="logs/seerpod-rotating.log", help="log file path")
 
-	# print "config:"
-	# print config.videoSource
-	# print config.videoType
-	# print config.contourAreaThresh
-	# print config.minFrameToWait
-	# print config.maxFramesToAnalyze
-	# print config.startTrackingLine
-	# print config.endTrackingLine
-	# print config.bbRatio
-
 	return parser.parse_args()
 
 if __name__ == "__main__":
@@ -73,10 +63,9 @@ if __name__ == "__main__":
 	if config.logger.isEnabledFor(logging.DEBUG):
 		config.logger.debug("Initialized %s background subtractor", backSubtrType)
 	
-	# keep on tracking until consecutive 1000 exceptions are encountered
+	# keep on tracking until consecutive 100 exceptions are encountered
 	errorCount = 0
 	while True:
-		#human_ctour_img, humanContours = ctour.getHumanContours(counter, backgroundSubtractor)
 		trackerType = "single"
 		tracker = Tracker(trackerType, backgroundSubtractor)
 		if config.logger.isEnabledFor(logging.DEBUG):
