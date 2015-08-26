@@ -1,4 +1,6 @@
 from SimpleCV import cv2, Image
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 import argparse
 import sys
 import logging
@@ -7,16 +9,20 @@ from back_subtractor import BackgroundSubtractor
 from tracker import Tracker
 
 class Counter(object):
+	camera = None
 	capture = None
 
 	def __init__(self):
-		print "vs:" + str(config.videoSource)
-		self.capture = cv2.VideoCapture(config.videoSource)
+		self.camera = PiCamera()
+		self.camera.resolution = (640, 480)
+		self.camera.framerate = 32
+		self.capture = PiRGBArray(self.camera, size=(640, 480))
+		# allow the camera to warmup
+		time.sleep(0.1)
 
-	def start(self):
-		if not(self.capture.isOpened()):
-			print str(self.capture)
-			self.capture.open()
+	# def start(self):
+	# 	if not(self.capture.isOpened()):
+	# 		self.capture.open()
 
 	def stop(self):
 		# close capture stream
@@ -26,14 +32,14 @@ class Counter(object):
 		# figure out a way to pause the capture stream
 		return
 
-	def getNextFrame(self):
-		_, frame = self.capture.read()
-		return frame
+	# def getNextFrame(self):
+	# 	_, frame = self.capture.read()
+	# 	return frame
 
-	def getNextSimpleCvImage(self):
-		_, frame = self.capture.read()
-		simplecvImg = Image(frame.transpose(1,0,2)[:,:,::-1])
-		return simplecvImg
+	# def getNextSimpleCvImage(self):
+	# 	_, frame = self.capture.read()
+	# 	simplecvImg = Image(frame.transpose(1,0,2)[:,:,::-1])
+	# 	return simplecvImg
 
 	def convertToSimpleCvImage(self, opencvImage):
 		return Image(opencvImage.transpose(1,0,2)[:,:,::-1])
@@ -55,7 +61,7 @@ if __name__ == "__main__":
 	config.init(args)
 	counter = Counter()
 
-	counter.start()
+	#counter.start()
 	if config.logger.isEnabledFor(logging.INFO):
 		config.logger.info("Counter started")
 	

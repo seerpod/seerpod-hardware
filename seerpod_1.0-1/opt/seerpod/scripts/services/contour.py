@@ -8,10 +8,10 @@ def getBigContours(counter, bkgSubtr):
 	if config.logger.isEnabledFor(logging.DEBUG):
 		config.logger.debug("Finding foreground object..."),
 
-	while(1):
+	for raspi_frame in counter.camera.capture_continuous(counter.capture, format="bgr", use_video_port=True):
+		frame = raspi_frame.array
 		# print ".",
 		# sys.stdout.flush()
-		frame = counter.getNextFrame()
 
 		if frame is None:
 			if config.logger.isEnabledFor(logging.DEBUG):
@@ -69,7 +69,7 @@ def getBigContours(counter, bkgSubtr):
 
 	# target contour not found in the video
 	if config.logger.isEnabledFor(logging.DEBUG):
-		config.logger.debug("no contour with area > contourAreaThresh found")
+		config.logger.debug("no contour with area > contourAreaThresh [%s] found", config.contourAreaThresh)
 	return (None, None)
 
 def removeSmallContours(orig_image, fgmask, minContourArea):

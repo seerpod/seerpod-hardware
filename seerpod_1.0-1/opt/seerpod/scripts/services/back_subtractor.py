@@ -27,11 +27,20 @@ class AbsDiffSubtractor(BackgroundSubtractor):
 	def __init__(self, counter):
 		capture = counter.capture
 		count = 0
-		while(capture.isOpened() and count<30):
+		# capture frames from the camera
+		for frame in counter.camera.capture_continuous(capture, format="bgr", use_video_port=True):
 			count += 1
-			_, frame = capture.read()
-			bkg = frame.copy()
+			# grab the raw NumPy array representing the image, then initialize the timestamp
+			# and occupied/unoccupied text
+			image = frame.array
+			bkg = image.copy()
 			blurred_bkg = cv2.GaussianBlur(bkg,(3,3),0)
+
+			# clear the stream in preparation for the next frame
+			capture.truncate(config.videoSource)
+		 	
+		 	if (count >= 30):
+		 		break
 		
 		self.background = blurred_bkg
 

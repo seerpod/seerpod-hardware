@@ -63,8 +63,11 @@ class SingleObjectTracker(Tracker):
 				target_ctour = human_ctours[key]
 				break
 
-			while True:
-				opencv_img = counter.getNextFrame()
+			for raspi_frame in counter.camera.capture_continuous(counter.capture, format="bgr", use_video_port=True):
+				opencv_img = raspi_frame.array
+				# clear the stream in preparation for the next frame
+				rawCapture.truncate(0)
+
 				fg_mask = self.backgroundSubtr.getForegroundMask(opencv_img)
 				processed_image,_ = ctour.removeSmallContours(opencv_img, fg_mask, config.contourAreaThresh/2)
 				simplecv_img = counter.convertToSimpleCvImage(processed_image)
