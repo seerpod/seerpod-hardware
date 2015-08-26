@@ -13,6 +13,9 @@ def getBigContours(counter, bkgSubtr):
 		# print ".",
 		# sys.stdout.flush()
 
+		# clear the stream in preparation for the next frame
+		counter.capture.truncate(0)
+
 		if frame is None:
 			if config.logger.isEnabledFor(logging.DEBUG):
 				config.logger.debug("No more frames to analyze, exiting")
