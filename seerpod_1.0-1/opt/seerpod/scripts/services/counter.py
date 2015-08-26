@@ -10,10 +10,12 @@ class Counter(object):
 	capture = None
 
 	def __init__(self):
+		print "vs:" + str(config.videoSource)
 		self.capture = cv2.VideoCapture(config.videoSource)
 
 	def start(self):
 		if not(self.capture.isOpened()):
+			print str(self.capture)
 			self.capture.open()
 
 	def stop(self):
