@@ -1,4 +1,5 @@
 from SimpleCV import cv2
+import config
 
 class BackgroundSubtractor(object):
 	subtractor = None
