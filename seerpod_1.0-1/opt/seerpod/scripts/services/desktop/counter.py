@@ -60,7 +60,7 @@ if __name__ == "__main__":
 		config.logger.info("Counter started")
 	
 	# initialize a background subtractor (can be one of "absdiff", "simple", or "mog2")
-	backSubtrType = "mog2"
+	backSubtrType = "absdiff"
 	backgroundSubtractor = BackgroundSubtractor(backSubtrType, counter)
 	if config.logger.isEnabledFor(logging.DEBUG):
 		config.logger.debug("Initialized %s background subtractor", backSubtrType)

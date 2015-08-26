@@ -20,9 +20,9 @@ class Counter(object):
 		# allow the camera to warmup
 		time.sleep(0.1)
 
-	# def start(self):
-	# 	if not(self.capture.isOpened()):
-	# 		self.capture.open()
+	def start(self):
+		# does nothing
+		return
 
 	def stop(self):
 		# close capture stream
@@ -31,15 +31,6 @@ class Counter(object):
 	def pause(self):
 		# figure out a way to pause the capture stream
 		return
-
-	# def getNextFrame(self):
-	# 	_, frame = self.capture.read()
-	# 	return frame
-
-	# def getNextSimpleCvImage(self):
-	# 	_, frame = self.capture.read()
-	# 	simplecvImg = Image(frame.transpose(1,0,2)[:,:,::-1])
-	# 	return simplecvImg
 
 	def convertToSimpleCvImage(self, opencvImage):
 		return Image(opencvImage.transpose(1,0,2)[:,:,::-1])
@@ -61,12 +52,11 @@ if __name__ == "__main__":
 	config.init(args)
 	counter = Counter()
 
-	#counter.start()
 	if config.logger.isEnabledFor(logging.INFO):
 		config.logger.info("Counter started")
 	
 	# initialize a background subtractor (can be one of "absdiff", "simple", or "mog2")
-	backSubtrType = "mog2"
+	backSubtrType = "absdiff"
 	backgroundSubtractor = BackgroundSubtractor(backSubtrType, counter)
 	if config.logger.isEnabledFor(logging.DEBUG):
 		config.logger.debug("Initialized %s background subtractor", backSubtrType)
