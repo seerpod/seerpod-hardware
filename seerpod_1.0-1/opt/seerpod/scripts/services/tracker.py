@@ -84,7 +84,7 @@ class SingleObjectTracker(Tracker):
 					fs1 = simplecv_img.track("camshift", fs1,img, target_ctour, num_frames=5)
 				except Exception as e:
 					if config.logger.isEnabledFor(logging.WARN):
-						config.logger.warn("Encountered exception: ", e)
+						config.logger.warn("Encountered exception: %s", e)
 					break
 
 				if self.isSubjectOutOfFrame(fs1):
