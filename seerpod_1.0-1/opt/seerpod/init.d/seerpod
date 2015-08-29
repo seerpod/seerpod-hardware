@@ -3,13 +3,15 @@
 start() {
 	echo "Starting Seerpod..."
 	sudo service health start
+	sudo service actor start
 	sudo service counter start
 	echo "Seerpod started."
 }
 
 stop() {
 	echo "Stopping Seerpod..."
-        sudo service health stop  
+        sudo service health stop
+	sudo service actor stop  
         sudo service counter stop
         echo "Seerpod stopped."
 }
@@ -17,6 +19,7 @@ stop() {
 status() {
 	echo "Fetching Seerpod Status..."
         sudo service health status
+	sudo service actor status
         sudo service counter status
         echo "Seerpod status complete."
 }
