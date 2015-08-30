@@ -16,10 +16,10 @@ class Counter(object):
 	def __init__(self):
 		self.camera = PiCamera()
 		self.camera.resolution = (640, 480)
-		self.camera.framerate = 32
+		self.camera.framerate = 30
 		self.capture = PiRGBArray(self.camera, size=(640, 480))
 		# allow the camera to warmup
-		time.sleep(0.1)
+		time.sleep(2.5)
 
 	def start(self):
 		# does nothing
@@ -42,7 +42,7 @@ def parseArguments():
 	parser.add_argument("-vs", "--videoSource", default="0", help="video file path or integer \
 		(enclosed on quotes) for video stream")
 	parser.add_argument("-out", "--outFile", default="out/counts.out", help="output file path")
-	parser.add_argument("-cat", "--contourAreaThresh", default=40000, help="min area of contours to pass human test")
+	parser.add_argument("-cat", "--contourAreaThresh", default=10000, help="min area of contours to pass human test")
 	parser.add_argument("-ll", "--logLevel", default="debug", help="log level [info/debug/warn/error/critical]")
 	parser.add_argument("-lf", "--logFile", default="logs/seerpod-rotating.log", help="log file path")
 

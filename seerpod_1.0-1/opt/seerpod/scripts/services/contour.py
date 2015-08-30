@@ -61,7 +61,7 @@ def getBigContours(counter, bkgSubtr):
 			# apply mask on orig_masked to hide small contours
 			orig_masked = cv2.bitwise_and(orig_masked, orig_masked, mask=mask)
 			# apply median blur to smoothen the image
-			orig_masked = cv2.medianBlur(orig_masked, 5)
+			#orig_masked = cv2.medianBlur(orig_masked, 5)
 			
 			# all the coordinates are assuming top left corner as origin (0,0) and lower area positive
 			# cv2.circle(orig_masked,(x,y), 10, (0,255,0), -1)
@@ -91,7 +91,7 @@ def removeSmallContours(orig_image, fgmask, minContourArea):
 	# apply mask on orig_masked to hide small contours
 	orig_masked = cv2.bitwise_and(orig_masked, orig_masked, mask=mask)
 	# apply median blur to smoothen the image
-	orig_masked = cv2.medianBlur(orig_masked, 5)
+	#orig_masked = cv2.medianBlur(orig_masked, 5)
 
 	return orig_masked, contours
 
